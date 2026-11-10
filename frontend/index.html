@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>JARVIS NEXUS — Embodied Spatial Sanctuary</title>
+    <link rel="stylesheet" href="/src/styles/nexus.css" />
+  </head>
+  <body>
+    <!-- Full-Bleed Real-Time 3D WebGL Sanctuary -->
+    <div id="viewport-root">
+      <canvas id="nexus-canvas"></canvas>
+      <!-- World-Space 3D Annotation Anchor Layer -->
+      <div id="spatial-labels-layer" aria-hidden="true"></div>
+      <!-- Holographic 4-Face Pyramid Calibration Guide (only visible in Mode 15 Pyramid layout) -->
+      <div id="hologram-guides" class="hidden">
+        <div class="holo-crosshair"></div>
+        <div class="holo-badge">LIVE HOLOGRAPHIC PROJECTION · SYNCHRONIZED REAL-TIME INSTANCE</div>
+      </div>
+    </div>
+
+    <!-- Restrained Edge-Anchored Owner Instrumentation -->
+    <header id="hud-top">
+      <div class="hud-cluster hud-brand-cluster">
+        <button id="btn-modes-drawer" class="hud-pill-btn" title="15 Operational Modes & Spatial Zones">
+          <span class="status-dot" id="core-conn-dot"></span>
+          <span class="brand-mark">JARVIS NEXUS</span>
+          <span class="sep">/</span>
+          <span id="active-mode-label">Living Presence</span>
+        </button>
+        <div class="activity-readout">
+          <span class="meta-tag" id="jarvis-zone-badge">CENTRAL OPS</span>
+          <span id="jarvis-activity-text">Initializing 3D sanctuary and rigged character...</span>
+        </div>
+      </div>
+
+      <div class="hud-cluster hud-right-controls">
+        <!-- 7 Persistent Hardware-Grade Owner Switches -->
+        <div id="switches-strip" class="switches-strip" role="group" aria-label="Owner Hardware & Privacy Switches"></div>
+
+        <div class="camera-bar">
+          <select id="camera-preset-select" title="Deliberate Cinema Camera Framing">
+            <option value="auto">Cam: Auto Director</option>
+            <option value="living_presence">40mm Living Presence</option>
+            <option value="conversation">65mm Conversational Focus</option>
+            <option value="follow_jarvis">35mm Follow Tracking</option>
+            <option value="scenario_stage">28mm Volumetric Stage</option>
+            <option value="video_presentation">35mm Media Wall</option>
+            <option value="memory_archive">40mm Memory Colonnade</option>
+            <option value="security_alert">35mm Security Vault</option>
+            <option value="wide_sanctuary">24mm Sanctuary Overview</option>
+          </select>
+          <button id="btn-hologram-toggle" class="hud-icon-btn" title="Physical Holographic Projection Output (Pepper's Ghost / 4-Face)">HOLO</button>
+          <button id="btn-inspector-drawer" class="hud-icon-btn" title="Open Contextual Sanctuary Inspector">INSPECT</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- First-Launch Restrained Arrival Banner (only shown when first_launch_completed === false) -->
+    <section id="first-wake-banner" class="wake-banner hidden" aria-live="polite">
+      <div class="wake-header">SANCTUARY INITIALIZED · TRUTHFUL CORE STATUS</div>
+      <p id="wake-status-copy">
+        JARVIS is online inside Central Operations. No commercial API is required. Connect a Local PC 4-bit CUDA worker or Private Kaggle GPU session for full neural reasoning, or explore interactive 3D scenarios directly.
+      </p>
+      <div class="wake-actions">
+        <button id="btn-wake-compute" class="btn-primary">Configure Local / Kaggle GPU</button>
+        <button id="btn-wake-scenario" class="btn-secondary">“Let Me Show You” (3D Scenario)</button>
+        <button id="btn-wake-dismiss" class="btn-ghost">Enter Sanctuary</button>
+      </div>
+    </section>
+
+    <!-- Left Navigation Drawer: 15 Operational Modes & 12 Physical Zones -->
+    <aside id="modes-drawer" class="side-drawer left-drawer hidden">
+      <div class="drawer-head">
+        <h2>15 Connected Operational Modes</h2>
+        <button id="btn-close-modes" class="btn-close">×</button>
+      </div>
+      <p class="drawer-sub">Every mode operates inside the same persistent 3D world—moving JARVIS physically to the appropriate station.</p>
+      <div id="modes-list" class="modes-grid"></div>
+      <div class="drawer-section">
+        <h3>Quick Locomotion & Performance Checks</h3>
+        <div class="quick-actions-row">
+          <button data-quick-move="central_operations" class="btn-chip">Walk: Central Ops</button>
+          <button data-quick-move="memory_archive" class="btn-chip">Walk: Memory Archive</button>
+          <button data-quick-move="research_area" class="btn-chip">Walk: Research</button>
+          <button data-quick-move="media_presentation" class="btn-chip">Walk: Media Wall</button>
+          <button data-quick-urgent="defensive_security" class="btn-chip btn-amber">Urgent Run: Security Alert</button>
+        </div>
+      </div>
+      <div class="drawer-section">
+        <label class="toggle-row">
+          <input type="checkbox" id="chk-reduced-motion" />
+          <span>Reduced Motion (gentle cuts, zero camera sweep)</span>
+        </label>
+      </div>
+    </aside>
+
+    <!-- Active Scenario Director Floating Bar (only visible when a 3D Scenario is active on Stage) -->
+    <section id="scenario-director-bar" class="scenario-bar hidden">
+      <div class="scenario-top-row">
+        <div>
+          <span class="scenario-class-badge" id="sc-class-badge">SOURCE-BACKED RECONSTRUCTION</span>
+          <strong id="sc-title">Cryogenic Manifold Cascade</strong>
+        </div>
+        <div class="scenario-transport">
+          <button id="sc-btn-playpause" class="btn-chip">Pause</button>
+          <button id="sc-btn-replay" class="btn-chip">Replay</button>
+          <select id="sc-rate-select" class="compact-select">
+            <option value="0.25">0.25×</option>
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1.0×</option>
+            <option value="2">2.0×</option>
+          </select>
+          <button id="sc-btn-record" class="btn-chip" title="Record live 3D scenario viewport to WebM">Rec WebM</button>
+          <button id="sc-btn-restore" class="btn-chip btn-danger-outline">Restore World</button>
+        </div>
+      </div>
+      <div class="scenario-timeline-row">
+        <span class="tabular" id="sc-time-readout">00.0s / 20.0s</span>
+        <input type="range" id="sc-timeline-slider" min="0" max="20" step="0.1" value="0" />
+        <span id="sc-phase-label" class="sc-phase">Baseline Laminar Flow</span>
+      </div>
+      <div id="sc-variables-row" class="scenario-vars-row"></div>
+      <div id="sc-branch-readout" class="scenario-branch-banner"></div>
+    </section>
+
+    <!-- Holographic Output Configuration Bar (visible in Mode 15) -->
+    <section id="hologram-control-bar" class="hologram-bar hidden">
+      <span>HOLOGRAPHIC OUTPUT:</span>
+      <button data-holo-layout="peppers_ghost" class="btn-chip active">45° Pepper's Ghost Mirror</button>
+      <button data-holo-layout="pyramid_4face" class="btn-chip">4-Face Pyramid Quad</button>
+      <button data-holo-layout="direct_black" class="btn-chip">Direct Optical Black</button>
+      <button id="btn-exit-hologram" class="btn-chip btn-danger-outline">Return to Sanctuary View</button>
+    </section>
+
+    <!-- Right Contextual Inspector Drawer (Memory, Goals, Agents, Tools, Media, Compute/Kaggle, Security) -->
+    <aside id="inspector-drawer" class="side-drawer right-drawer hidden">
+      <div class="drawer-head">
+        <div class="inspector-tabs" id="inspector-tabs">
+          <button data-tab="scenarios" class="tab-btn active">Scenarios</button>
+          <button data-tab="media" class="tab-btn">Video</button>
+          <button data-tab="memory" class="tab-btn">Memory</button>
+          <button data-tab="goals" class="tab-btn">Goals</button>
+          <button data-tab="agents" class="tab-btn">Agents & Tools</button>
+          <button data-tab="compute" class="tab-btn">Kaggle / GPU</button>
+          <button data-tab="telemetry" class="tab-btn">Diagnostics</button>
+        </div>
+        <button id="btn-close-inspector" class="btn-close">×</button>
+      </div>
+      <div id="inspector-body" class="inspector-body"></div>
+    </aside>
+
+    <!-- Bottom Conversational & Multimodal Command Bar -->
+    <footer id="dialogue-dock">
+      <div id="subtitle-ribbon" class="subtitle-ribbon hidden">
+        <span class="speaker-tag">JARVIS</span>
+        <span id="subtitle-text"></span>
+        <span class="source-pill" id="inference-source-pill">executive</span>
+      </div>
+
+      <form id="chat-form" class="dialogue-bar" autocomplete="off">
+        <button type="button" id="btn-mic-ptt" class="dock-btn" title="Voice Input (Requires Microphone Switch ON)">
+          <span id="mic-state-label">MIC OFF</span>
+        </button>
+        <button type="button" id="btn-cam-snap" class="dock-btn" title="Optical Vision Snapshot (Requires Camera Switch ON)">
+          <span id="cam-state-label">CAM OFF</span>
+        </button>
+        <input
+          type="text"
+          id="chat-input"
+          placeholder="Speak directly with JARVIS — e.g. “Show me the cryogenic manifold failure in 3D” or “Compare turbine variants”..."
+        />
+        <button type="button" id="btn-interrupt" class="dock-btn btn-warn hidden" title="Interrupt JARVIS mid-speech or mid-motion">
+          Interrupt
+        </button>
+        <button type="button" id="btn-resume-task" class="dock-btn btn-cyan-outline hidden" title="Resume previously interrupted station work">
+          Resume Work
+        </button>
+        <button type="submit" class="dock-btn btn-send">Transmit</button>
+      </form>
+    </footer>
+
+    <!-- Hidden Media Elements for Real Video Wall & Optional Optical Camera Preview -->
+    <video id="uploaded-video-el" class="hidden" playsinline crossorigin="anonymous" loop></video>
+    <video id="optical-cam-el" class="hidden" playsinline autoplay muted></video>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
