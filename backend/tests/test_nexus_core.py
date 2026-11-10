@@ -250,3 +250,22 @@ def test_authenticated_private_worker_websocket_streaming():
             body = chat_res.json()
             assert body["jarvis_message"]["inference_source"] == "local_pc"
             assert body["jarvis_message"]["content"] == "Telemetry confirms nominal flow."
+
+
+def test_supabase_url_and_fernet_passphrase_normalization():
+    from cryptography.fernet import Fernet
+    from backend.app.config import _normalize_fernet_key, normalize_database_url
+
+    supa_pooler = "postgresql://postgres.ref123:pw@aws-0-eu-west-1.pooler.supabase.com:6543/postgres"
+    assert normalize_database_url(supa_pooler) == (
+        "postgresql+psycopg://postgres.ref123:pw@aws-0-eu-west-1.pooler.supabase.com:6543/postgres"
+    )
+    assert normalize_database_url("postgres://u:p@db.supabase.co:5432/postgres") == (
+        "postgresql+psycopg://u:p@db.supabase.co:5432/postgres"
+    )
+
+    derived = _normalize_fernet_key("my-production-railway-passphrase")
+    f = Fernet(derived.encode("ascii"))
+    token = f.encrypt(b"jarvis-secret")
+    assert f.decrypt(token) == b"jarvis-secret"
+

@@ -27,9 +27,25 @@ const opticalCamEl = document.getElementById('optical-cam-el');
 
 const sanctuary = new NexusSanctuaryScene(canvas, labelsLayer);
 
+// Optional external CORE origin when Frontend is hosted separately (e.g. Vercel -> Railway).
+// Defaults to '' (same-origin relative URLs) when served directly by Railway / FastAPI / Vite proxy.
+const CORE_HTTP_ORIGIN = (import.meta.env.VITE_CORE_URL || '').trim().replace(/\/+$/, '');
+
+function coreHttpUrl(path) {
+  return CORE_HTTP_ORIGIN ? `${CORE_HTTP_ORIGIN}${path}` : path;
+}
+
+function coreWsBase() {
+  if (CORE_HTTP_ORIGIN) {
+    return CORE_HTTP_ORIGIN.replace(/^http:/i, 'ws:').replace(/^https:/i, 'wss:');
+  }
+  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${proto}//${window.location.host}`;
+}
+
 async function api(path, options = {}) {
   const headers = options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' };
-  const res = await fetch(path, {
+  const res = await fetch(coreHttpUrl(path), {
     ...options,
     headers: { ...headers, ...(options.headers || {}) },
   });
@@ -89,9 +105,8 @@ async function bootstrap() {
 
 function connectNexusWebSocket() {
   const isMobile = window.innerWidth <= 860;
-  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   const deviceTag = isMobile ? 'mobile_companion' : 'pc_sanctuary';
-  const wsUrl = `${proto}//${window.location.host}/ws/nexus?device=${deviceTag}`;
+  const wsUrl = `${coreWsBase()}/ws/nexus?device=${deviceTag}`;
 
   const dot = document.getElementById('core-conn-dot');
   const ws = new WebSocket(wsUrl);
@@ -607,7 +622,7 @@ async function renderInspectorTab(tab) {
           <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap">
             <button class="btn-chip" data-kaggle-select="${p.id}" data-kname="${p.profile_name}" data-kmodel="${p.preferred_model}" data-kgpu="${p.gpu_accelerator}">Select Active</button>
             <button class="btn-chip btn-cyan-outline" data-kaggle-test="${p.id}">Test Auth</button>
-            <a class="btn-chip" style="text-decoration:none" href="/api/v1/compute/kaggle/profiles/${p.id}/package?core_wss_url=${encodeURIComponent(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/worker`)}" download>Download Worker ZIP</a>
+            <a class="btn-chip" style="text-decoration:none" href="${coreHttpUrl(`/api/v1/compute/kaggle/profiles/${p.id}/package?core_wss_url=${encodeURIComponent(`${coreWsBase()}/ws/worker`)}`)}" download>Download Worker ZIP</a>
           </div>
         </div>
       `).join('')}
@@ -970,7 +985,8 @@ function bindMediaPanelHandlers(curMedia) {
     e.preventDefault();
     const fd = new FormData(e.target);
     const uploaded = await api('/api/v1/media/upload', { method: 'POST', body: fd });
-    uploadedVideoEl.src = uploaded.url;
+    uploadedVideoEl.crossOrigin = 'anonymous';
+    uploadedVideoEl.src = coreHttpUrl(uploaded.url);
     await uploadedVideoEl.play().catch(() => {});
     sanctuary.setExternalVideoTexture(uploadedVideoEl);
     renderInspectorTab('media');
